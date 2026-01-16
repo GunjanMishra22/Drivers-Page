@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Tracking - Roshi Transport</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFF8E7 0%, #F5E6D3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 165, 0, 0.3);
+        }
+
+        .header h1 {
+            color: #2C1810;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #5D4037;
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #5D4037;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #FFE4B5;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            color: #2C1810;
+            transition: all 0.3s ease;
+            background: #FFFBF0;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #FFFBF0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-group label {
+            color: #5D4037;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #4CAF50;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        .status-indicator {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-inactive {
+            background: #F5F5F5;
+            color: #757575;
+            display: block;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            grid-column: span 2;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #2C1810;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+            grid-column: span 2;
+        }
+
+        .btn-update:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4);
+        }
+
+        .btn-navigate {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            grid-column: span 2;
+        }
+
+        .btn-navigate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats-box {
+            background: #FFFBF0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .stats-box.show {
+            display: block;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: #8D6E63;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: #2C1810;
+            font-weight: 700;
+        }
+
+        .info-box {
+            background: #FFF8E7;
+            border: 2px solid #FFE4B5;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box p {
+            color: #5D4037;
+            font-size: 0.85em;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #2C1810;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #5D4037;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            color: #8D6E63;
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-cancel, .btn-update, .btn-navigate {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Driver Tracking</h1>
+            <p>Roshi Transport Corporation</p>
+        </div>
+
+        <div class="card">
+            <div class="status-indicator status-inactive" id="statusInactive">
+                🔴 Tracking Inactive
+            </div>
+            <div class="status-indicator status-active" id="statusActive">
+                🟢 Tracking Active - Updating Every 10s
+            </div>
+
+            <div class="form-group">
+                <label>Driver Name</label>
+                <input type="text" id="driverName" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="driverMobile" placeholder="Enter 10 digit mobile number" maxlength="10">
+            </div>
+
+            <div class="toggle-group">
+                <label>Show Speed & GPS Accuracy</label>
+                <div class="toggle-switch" id="toggleStats" onclick="toggleStatsDisplay()"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-start" id="startBtn" onclick="confirmStart()">
+                    Start Journey
+                </button>
+                <button class="btn btn-stop" id="stopBtn" onclick="confirmStop()" disabled>
+                    Stop Journey
+                </button>
+                <button class="btn btn-navigate" id="navigateBtn" onclick="openNavigation()">
+                    Navigate Me
+                </button>
+                <button class="btn btn-cancel" id="cancelBtn" onclick="cancelJourney()" disabled style="display: none;">
+                    Cancel Journey
+                </button>
+                <button class="btn btn-update" id="updateBtn" onclick="forceUpdate()" disabled style="display: none;">
+                    Update Now
+                </button>
+            </div>
+
+            <div class="stats-box" id="statsBox">
+                <div class="stat-item">
+                    <span class="stat-label">Last Update:</span>
+                    <span class="stat-value" id="lastUpdate">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Updates Sent:</span>
+                    <span class="stat-value" id="updateCount">0</span>
+                </div>
+                <div class="stat-item" id="speedStat" style="display: none;">
+                    <span class="stat-label">Speed:</span>
+                    <span class="stat-value" id="speedValue">- km/h</span>
+                </div>
+                <div class="stat-item" id="accuracyStat" style="display: none;">
+                    <span class="stat-label">GPS Accuracy:</span>
+                    <span class="stat-value" id="accuracyValue">- meters</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <p><strong>📱 Important:</strong> Keep this page open in your browser while driving.</p>
+                <p><strong>🔋 Tip:</strong> Connect your phone to charger for best results.</p>
+                <p><strong>📍 Privacy:</strong> Location tracking only active during journey.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2024 Roshi Transport Corporation. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Confirmation Modals -->
+    <div class="modal" id="startModal">
+        <div class="modal-content">
+            <h2>Start Journey?</h2>
+            <p>This will start tracking your location every 10 seconds. Make sure to keep this page open.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal('startModal')">Cancel</button>
+                <button class="btn btn-start" onclick="startTracking()">Start</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="stopModal">
+        <div class="modal-content">
+            <h2>Stop Journey?</h2>
+            <p>This will stop location tracking. Your last location will be saved for 12 hours.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal('stopModal')">Cancel</button>
+                <button class="btn btn-stop" onclick="stopTracking()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="thankYouModal">
+        <div class="modal-content">
+            <h2>✅ Journey Stopped</h2>
+            <p>Thank you for using Roshi Transport tracking system. Drive safe!</p>
+            <button class="btn btn-start" onclick="closeModal('thankYouModal')" style="width: 100%;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxpgeYCfG3SjssGF_u68zRGjwuK2qbCvcXD3amm8NGDIznn6rZhjgjSev7mTOwtafeRQw/exec';
+        let trackingInterval = null;
+        let updateCount = 0;
+        let driverData = {};
+        let showStats = false;
+        let routeOrigin = '';
+        let routeDestination = '';
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            routeOrigin = urlParams.get('origin') || '';
+            routeDestination = urlParams.get('destination') || '';
+
+            const saved = localStorage.getItem('driverTracking');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('driverName').value = data.name || '';
+                document.getElementById('driverMobile').value = data.mobile || '';
+                
+                if (data.isTracking) {
+                    driverData = data;
+                    updateCount = data.updateCount || 0;
+                    resumeTracking();
+                }
+            }
+        };
+
+        function openNavigation() {
+            if (!routeOrigin || !routeDestination) {
+                alert('Route information not available. Please return to the Approved Route page.');
+                return;
+            }
+
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(routeOrigin)}&destination=${encodeURIComponent(routeDestination)}&travelmode=driving`;
+            window.open(mapsUrl, '_blank');
+        }
+
+        function toggleStatsDisplay() {
+            showStats = !showStats;
+            const toggle = document.getElementById('toggleStats');
+            toggle.classList.toggle('active');
+            
+            if (showStats) {
+                document.getElementById('speedStat').style.display = 'flex';
+                document.getElementById('accuracyStat').style.display = 'flex';
+            } else {
+                document.getElementById('speedStat').style.display = 'none';
+                document.getElementById('accuracyStat').style.display = 'none';
+            }
+        }
+
+        function confirmStart() {
+            const name = document.getElementById('driverName').value.trim();
+            const mobile = document.getElementById('driverMobile').value.trim();
+
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            if (!mobile || mobile.length !== 10 || !/^\d+$/.test(mobile)) {
+                alert('Please enter valid 10 digit mobile number');
+                return;
+            }
+
+            showModal('startModal');
+        }
+
+        function confirmStop() {
+            showModal('stopModal');
+        }
+
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function startTracking() {
+            closeModal('startModal');
+
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+
+            const name = document.getElementById('driverName').value.trim();
+            const mobile = document.getElementById('driverMobile').value.trim();
+
+            driverData = {
+                name: name,
+                mobile: mobile,
+                isTracking: true,
+                updateCount: 0
+            };
+
+            document.getElementById('driverName').disabled = true;
+            document.getElementById('driverMobile').disabled = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('cancelBtn').style.display = 'block';
+            document.getElementById('cancelBtn').disabled = false;
+            document.getElementById('updateBtn').style.display = 'block';
+            document.getElementById('updateBtn').disabled = false;
+            document.getElementById('statusInactive').style.display = 'none';
+            document.getElementById('statusActive').style.display = 'block';
+            document.getElementById('statsBox').classList.add('show');
+
+            sendLocation();
+            trackingInterval = setInterval(sendLocation, 10000); // 10 seconds
+
+            localStorage.setItem('driverTracking', JSON.stringify(driverData));
+        }
+
+        function resumeTracking() {
+            document.getElementById('driverName').disabled = true;
+            document.getElementById('driverMobile').disabled = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('cancelBtn').style.display = 'block';
+            document.getElementById('cancelBtn').disabled = false;
+            document.getElementById('updateBtn').style.display = 'block';
+            document.getElementById('updateBtn').disabled = false;
+            document.getElementById('statusInactive').style.display = 'none';
+            document.getElementById('statusActive').style.display = 'block';
+            document.getElementById('statsBox').classList.add('show');
+            document.getElementById('updateCount').textContent = updateCount;
+
+            trackingInterval = setInterval(sendLocation, 10000);
+        }
+
+        function stopTracking() {
+            closeModal('stopModal');
+            
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+            }
+
+            sendLocation(true);
+
+            document.getElementById('driverName').disabled = false;
+            document.getElementById('driverMobile').disabled = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('updateBtn').style.display = 'none';
+            document.getElementById('statusInactive').style.display = 'block';
+            document.getElementById('statusActive').style.display = 'none';
+            document.getElementById('statsBox').classList.remove('show');
+
+            localStorage.removeItem('driverTracking');
+            updateCount = 0;
+            
+            showModal('thankYouModal');
+        }
+
+        function cancelJourney() {
+            if (confirm('Cancel journey? This will stop tracking immediately.')) {
+                stopTracking();
+            }
+        }
+
+        function forceUpdate() {
+            sendLocation();
+        }
+
+        function sendLocation(isStopped = false) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const data = {
+                        name: driverData.name,
+                        mobile: driverData.mobile,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        timestamp: new Date().toISOString(),
+                        status: isStopped ? 'Stopped' : 'Active',
+                        speed: position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0,
+                        accuracy: Math.round(position.coords.accuracy)
+                    };
+
+                    fetch(API_URL, {
+                        redirect: 'follow',
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                        body: JSON.stringify(data)
+                    }).then(response => {
+                        console.log('Location sent successfully');
+                        updateCount++;
+                        document.getElementById('updateCount').textContent = updateCount;
+                        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('en-IN');
+                        
+                        if (showStats) {
+                            document.getElementById('speedValue').textContent = data.speed + ' km/h';
+                            document.getElementById('accuracyValue').textContent = data.accuracy + ' meters';
+                        }
+                        
+                        driverData.updateCount = updateCount;
+                        localStorage.setItem('driverTracking', JSON.stringify(driverData));
+                    }).catch(error => {
+                        console.error('Error:', error);
+                    });
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
+    </script>
+</body>
+</html>
