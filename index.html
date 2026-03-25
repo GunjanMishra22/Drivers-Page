@@ -491,7 +491,7 @@
         }
 
         .empty-state p {
-            font-size: 0.95em;
+            font-size: 0.9em;
             font-weight: 500;
         }
 
@@ -783,27 +783,43 @@
                 `Last updated: ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
         }
 
+        function clearContainers() {
+            const emptyHTML = (msg) => `
+                <div class="empty-state">
+                    <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 8l9 6 9-6M3 8v10a2 2 0 002 2h14a2 2 0 002-2V8M3 8a2 2 0 012-2h14a2 2 0 012 2" stroke="#7A5C34" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <p>${msg}</p>
+                </div>`;
+            document.getElementById('availableLoads').innerHTML = emptyHTML('No available loads at the moment');
+            document.getElementById('completedLoads').innerHTML = emptyHTML('No booked or completed loads');
+            document.getElementById('availableCount').textContent = '0';
+            document.getElementById('completedCount').textContent = '0';
+        }
+
         async function fetchData() {
+            // Always wipe stale data before processing new response
+            clearContainers();
+
             try {
                 const response = await fetch(SHEET_URL, {
                     method: 'GET',
                     cache: 'no-cache'
                 });
-                
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('HTTP error: ' + response.status);
                 }
-                
+
                 const csv = await response.text();
-                
-                if (!csv || csv.trim() === '') {
-                    throw new Error('Empty response from Google Sheets');
-                }
-                
+
+                // Empty or header-only sheet — containers already cleared, nothing to render
+                if (!csv || csv.trim() === '') return;
+
                 const data = parseCSV(csv);
+                // If no valid rows, containers stay cleared — no ghost data
                 updateDashboard(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                // On failure, containers already cleared — no ghost data shown
             }
         }
 
